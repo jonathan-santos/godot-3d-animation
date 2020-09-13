@@ -22,3 +22,8 @@ func _process(delta):
 	
 	velocity = velocity.linear_interpolate(direction * SPEED, ACCELERATION * delta)
 	velocity = move_and_slide(velocity, Vector3.UP)
+	
+	if direction.length() > 0:
+		$AnimationPlayer.play("Moving")
+	else:
+		$AnimationPlayer.play("Idle")
