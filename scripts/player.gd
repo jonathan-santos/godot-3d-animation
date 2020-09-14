@@ -1,14 +1,19 @@
 extends KinematicBody
 
-const SPEED := 15
+const SPEED := 15.0
 const ACCELERATION := 20.0
+const JUMP_POWER := 25.0
+const GRAVITY := 12
+
 var velocity: Vector3
 var direction: Vector3
-onready var body := $Body
+var fall: Vector3
 
+onready var body := $Body
 onready var camera: Spatial = get_viewport().get_camera()
 
-func _process(delta):
+func _physics_process(delta):
+	jump(delta)
 	move(delta)
 	switch_animations()
 	rotate_body()
@@ -26,8 +31,18 @@ func move(delta):
 	elif Input.is_action_pressed("move_right"):
 		direction += camera.transform.basis.x
 	
-	velocity = velocity.linear_interpolate(direction * SPEED, ACCELERATION * delta)
+	direction.y = 0
+	velocity = velocity.linear_interpolate(direction.normalized() * SPEED, ACCELERATION * delta)
 	velocity = move_and_slide(velocity, Vector3.UP)
+
+func jump(delta):
+	if not is_on_floor():
+		fall.y -= GRAVITY * delta
+
+	if is_on_floor() and Input.is_action_just_pressed("jump"):
+		fall.y = JUMP_POWER
+	
+	move_and_slide(fall, Vector3.UP)
 	
 func switch_animations():
 	if direction.length() > 0:
